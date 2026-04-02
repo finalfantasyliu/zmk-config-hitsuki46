@@ -117,12 +117,12 @@
             >;
         };
 
-        MOUSE {  // Layer 5 - 軌跡球移動時自動切換，G=左鍵、B=右鍵、按住K=捲動
+        MOUSE {  // Layer 5 - 軌跡球移動時自動切換，G=左鍵、B=右鍵、左拇指CTRL=捲動
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans      &trans  &trans  &trans          &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &mkp MB1    &trans  &trans  &lt SCROLL K   &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &mkp MB2    &trans  &trans  &trans          &trans  &trans  &trans
-        &trans  &trans  &trans  &trans  &trans    &trans  &trans    &trans  &trans    &trans
+&trans  &trans  &trans  &trans  &trans  &trans      &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &mkp MB1    &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans  &trans  &trans  &trans  &mkp MB2    &trans  &trans  &trans  &trans  &trans  &trans
+        &trans  &trans  &trans  &trans  &mo SCROLL    &trans  &trans  &trans  &trans  &trans
             >;
         };
 

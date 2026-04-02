@@ -14,6 +14,7 @@
   - [改動三：軌跡球 CPI](#改動三軌跡球-cpi)
   - [改動四：捲動方向修正](#改動四捲動方向修正)
   - [改動五：ws2812_wdg 電量查看](#改動五ws2812_wdg-電量查看)
+  - [改動六：BT 層按鍵位置調整](#改動六bt-層按鍵位置調整)
 - [第三部分：LED 系統比較 — WS2812 Widget vs RGBLED Widget](#第三部分led-系統比較--ws2812-widget-vs-rgbled-widget)
   - [為什麼 hitsuki46 用不同的 LED 系統](#為什麼-hitsuki46-用不同的-led-系統)
   - [兩種方案的差異比較](#兩種方案的差異比較)
@@ -105,8 +106,8 @@ build.yaml                        ← CI/CD build 目標
 | 2 | NUM | 按住 SPC / LANG1 / ENTER | 數字 + F 鍵 |
 | 3 | MEDIA | 按住 ALT | 音量、亮度、播放控制 |
 | 4 | BLUETOOTH | 按住 DEL 或 SQT | 藍牙配對、切換裝置 |
-| 5 | MOUSE | 軌跡球移動時自動啟用 | J=左鍵、L=右鍵、按住K=捲動 |
-| 6 | SCROLL | MOUSE 層按住 K | 軌跡球變捲輪 |
+| 5 | MOUSE | 軌跡球移動時自動啟用 | G=左鍵、B=右鍵、左拇指CTRL=捲動 |
+| 6 | SCROLL | MOUSE 層按住左拇指 CTRL | 軌跡球變捲輪 |
 | 7 | VIM | 按住 Space | H=左 J=下 K=上 L=右 |
 | 8 | DESKTOP | 按住 W | macOS 桌面切換 |
 
@@ -148,12 +149,16 @@ LSHIFT Z    X        C    V    B    |    N    M    ,    .    /      RSHIFT
 
 #### MOUSE 層（Layer 5）
 
-軌跡球移動時自動啟用。在此層：
-- **J** = 左鍵（MB1）
-- **L** = 右鍵（MB2）
-- **按住 K** = 進入 SCROLL 層（軌跡球變捲輪）
+軌跡球移動時自動啟用（2 秒無移動後退出）。在此層：
+- **G** [17] = 左鍵（MB1）← 左手
+- **B** [29] = 右鍵（MB2）← 左手
+- **左拇指 CTRL** [40] = `&mo SCROLL`（按住=捲動模式）
 
-為什麼按鍵在右手？因為 hitsuki46 是**雙軌跡球**鍵盤，左右手都能操作軌跡球。右手 home row 的 J/K/L 位置最方便快速點擊。
+> **為什麼改成左手 G/B？**
+> 最初設計是 J/K/L（右手），但實測發現打字時容易誤觸。改成 G/B（左手）後，左手負責點擊、右手負責移動軌跡球，操作更分明，不會跟打字動作衝突。
+
+> **為什麼捲動改到左拇指 CTRL？**
+> 原本捲動是按住 K（右手 home row），但同樣有誤觸問題。改到左拇指 CTRL 後，需要刻意用拇指按住才會觸發捲動，不會在打字時意外啟用。在非 MOUSE 層時，這個鍵還是正常的 CTRL。
 
 #### Hold-Tap 參數
 
@@ -166,13 +171,15 @@ require-prior-idle-ms = <150>;
 
 ### 改動二：右半硬體設定 (overlay)
 
-#### 自動滑鼠層（AML）層號更新
+#### 自動滑鼠層（AML）層號和超時更新
 
 ```
-zip_temp_layer 1 700  →  zip_temp_layer 5 700
+zip_temp_layer 1 700  →  zip_temp_layer 5 2000
 ```
 
-軌跡球移動時自動切到的層，從 Layer 1 改為 Layer 5（MOUSE）。數字必須跟 keymap 裡的 MOUSE 層對應。
+兩個改動：
+1. **層號**：從 Layer 1 改為 Layer 5（MOUSE），對應 keymap 的新層結構
+2. **超時**：從 700ms 加長到 2000ms。原本 0.7 秒太短，滑鼠操作（定位→點擊）常常來不及就退出了
 
 #### 捲動層層號更新
 
@@ -180,7 +187,46 @@ zip_temp_layer 1 700  →  zip_temp_layer 5 700
 layers = <5>;  →  layers = <6>;
 ```
 
-按住 K 進入捲動模式時，軌跡球輸入轉為捲動的層號，從 Layer 5 改為 Layer 6（SCROLL）。
+軌跡球輸入轉為捲動的層號，從 Layer 5 改為 Layer 6（SCROLL）。
+
+#### 防誤觸設定（excluded-positions + require-prior-idle）
+
+```c
+&zip_temp_layer {
+    require-prior-idle-ms = <200>;
+    excluded-positions = <
+        17 // G - MB1（左鍵）
+        29 // B - MB2（右鍵）
+        40 // 左拇指 CTRL（MOUSE 層中為 SCROLL 觸發）
+        12 // LCTRL
+        24 // LSHIFT
+        35 // RSHIFT
+        38 // CMD
+    >;
+};
+```
+
+**`require-prior-idle-ms = <200>`：** 打字後 200ms 內的軌跡球移動會被忽略。防止打字時手掌碰到軌跡球意外切到 MOUSE 層。
+
+**`excluded-positions`：** 在 MOUSE 層按這些鍵不會退出 MOUSE 層。沒有這個設定的話，按 G（左鍵）的瞬間 MOUSE 層就會退出，G 會輸出字母 g 而不是滑鼠左鍵。包含修飾鍵是為了支援 Shift+點擊、Ctrl+點擊等組合操作。
+
+#### 點擊延長超時（mkp_input_listener）
+
+```c
+&mkp_input_listener { input-processors = <&zip_temp_layer MOUSE 10000>; };
+```
+
+**這是什麼？** 當你按下滑鼠鍵（G 或 B）時，MOUSE 層的超時會被延長到 10 秒。
+
+**為什麼需要？** 沒有這個設定時，MOUSE 層的超時只靠軌跡球移動重置（2 秒）。雙擊操作時：
+1. 移動軌跡球 → MOUSE 層啟用
+2. 按 G（第一次點擊）→ MB1
+3. 鬆開 G → 如果軌跡球沒在動，2 秒計時器在跑
+4. 按 G（第二次點擊）→ 如果超時了，MOUSE 層已退出，G 輸出字母 g 而非 MB1
+
+加了 `mkp_input_listener` 後，第一次點擊就會把超時延長到 10 秒，確保後續的雙擊、拖曳等操作都在 MOUSE 層內完成。
+
+> **實測問題：** 在 YouTube 全螢幕雙擊後，單擊會持續變成雙擊。原因就是 MOUSE 層超時太短（700ms）且沒有點擊延長，導致層在操作途中閃退再重入，產生多餘的點擊事件。
 
 ---
 
@@ -238,6 +284,20 @@ ws2812_wdg: ws2812_widget {
 使用時傳入一個參數（0）：`&ws2812_wdg 0`
 
 放在 **BT 層的 B 鍵**位置，進藍牙層按 B 就能查看狀態。
+
+---
+
+### 改動六：BT 層按鍵位置調整
+
+因為安裝軌跡球後，右拇指最外側的鍵 [45] 變成了切層鍵（`lt(4, SQT)` 按住進入 BT 層）。在 BT 層時你正在按住 [45]，所以 [45] 位置的 BT_CLR_ALL 無法觸發。
+
+修正：把 BT_CLR 和 BT_CLR_ALL 各往上移一格：
+
+| 位置 | 改前 | 改後 |
+|------|------|------|
+| Row 1 右末 [23] | &trans | BT_CLR |
+| Row 2 右末 [35] | BT_CLR | BT_CLR_ALL |
+| Row 3 右末 [45] | BT_CLR_ALL | &trans（不可按） |
 
 ---
 

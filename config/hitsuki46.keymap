@@ -20,6 +20,9 @@
     require-prior-idle-ms = <150>;
 };
 
+// 點擊滑鼠鍵時延長 MOUSE 層超時至 10 秒，防止雙擊/連續操作時層閃退
+&mkp_input_listener { input-processors = <&zip_temp_layer MOUSE 10000>; };
+
 / {
     combos {
         compatible = "zmk,combos";

@@ -32,6 +32,20 @@
 &trackball_left_split {
 };
 
+// AML 防誤觸設定：打字後 200ms 內忽略軌跡球，按以下鍵不退出 MOUSE 層
+&zip_temp_layer {
+    require-prior-idle-ms = <200>;
+    excluded-positions = <
+        17 // G - MB1（左鍵）
+        29 // B - MB2（右鍵）
+        40 // 左拇指 CTRL（MOUSE 層中為 SCROLL 觸發）
+        12 // LCTRL
+        24 // LSHIFT
+        35 // RSHIFT
+        38 // CMD
+    >;
+};
+
 // XY Clipper - clips diagonal input to dominant axis only
 / {
     xy_clipper: xy_clipper {

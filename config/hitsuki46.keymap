@@ -15,9 +15,9 @@
 };
 
 &lt {
-    quick-tap-ms = <300>;
+    tapping-term-ms = <200>;
+    quick-tap-ms = <200>;
     flavor = "balanced";
-    require-prior-idle-ms = <150>;
 };
 
 // 點擊滑鼠鍵時延長 MOUSE 層超時至 10 秒，防止雙擊/連續操作時層閃退
@@ -40,9 +40,9 @@
         };
 
         input_switch {
-            bindings = <&kp LC(SPACE)>;
-            key-positions = <14 15>;  // S+D = 切換輸入法（Ctrl+Space）
-            slow-release;             // 兩鍵都放開才結束，防止重複觸發
+            bindings = <&input_tap>;
+            key-positions = <14 15>;  // S+D = 切換輸入法
+            slow-release;
         };
     };
 
@@ -52,6 +52,13 @@
             #binding-cells = <1>;
             bindings = <&to 0 &macro_param_1to1 &kp MACRO_PLACEHOLDER>;
             label = "TO_LAYER_0";
+        };
+
+        input_tap: input_tap {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&macro_tap &kp LC(SPACE)>;
+            label = "INPUT_TAP";
         };
     };
 

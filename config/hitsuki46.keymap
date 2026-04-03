@@ -30,11 +30,13 @@
         tab {
             bindings = <&kp TAB>;
             key-positions = <2 3>;    // W+E = Tab
+            slow-release;
         };
 
         enter {
             bindings = <&kp ENTER>;
             key-positions = <19 20>;  // J+K = Enter
+            slow-release;
         };
 
         input_switch {

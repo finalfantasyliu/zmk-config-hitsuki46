@@ -162,10 +162,22 @@ LSHIFT Z    X        C    V    B    |    N    M    ,    .    /      RSHIFT
 
 #### Hold-Tap 參數
 
-```
-require-prior-idle-ms = <150>;
-```
-快速打字時（150ms 內連續按鍵），所有 hold-tap 鍵直接判定為點按。避免打字時意外觸發層切換。
+**`&mt`（Mod-Tap，如 Shift on Z）：**
+- `require-prior-idle-ms = <150>`：打字中直接判定 tap，防誤觸 Shift
+
+**`&lt`（Layer-Tap，如 Backspace→SYM）：**
+- **不設** `require-prior-idle-ms`：讓切層隨時響應，不受打字速度影響
+- `tapping-term-ms = <200>`、`quick-tap-ms = <200>`
+
+> 為什麼分開？`&mt` 管修飾鍵（打字常碰到要防誤觸），`&lt` 管切層（主動操作不需門檻）。[ZMK Hold-Tap 文件](https://zmk.dev/docs/keymaps/behaviors/hold-tap)
+
+#### Combo 防重複觸發
+
+所有 combo 加了 `slow-release`（兩鍵都放開才結束）。Input Switch combo 額外改用 `&input_tap` macro：不管按多久只送一次 Ctrl+Space，防止 macOS 循環切換輸入法。[ZMK Combo 文件](https://zmk.dev/docs/keymaps/combos)
+
+#### 軌跡球位置不擋鍵
+
+經查證[原作者 gohanda11 的 repo](https://github.com/gohanda11/zmk-config-hitsuki46) 和多數 fork，軌跡球有自己的獨立位置，**不佔用任何按鍵位**。所有 46 個按鍵都可以正常使用。
 
 ---
 

@@ -20,8 +20,8 @@
     flavor = "balanced";
 };
 
-// 點擊滑鼠鍵時延長 MOUSE 層超時至 2 秒（ZMK 官方建議值）
-&mkp_input_listener { input-processors = <&zip_temp_layer MOUSE 2000>; };
+// 點完後 250ms 退出 MOUSE 層（快速回到打字模式）
+&mkp_input_listener { input-processors = <&zip_temp_layer MOUSE 250>; };
 
 / {
     combos {

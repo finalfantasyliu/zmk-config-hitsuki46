@@ -76,7 +76,7 @@
         // but cursor needs correct direction
         input-processors =
             <&zip_xy_transform INPUT_TRANSFORM_Y_INVERT>,
-            <&zip_temp_layer 5 2000>;
+            <&zip_temp_layer 5 10000>;
 
         // Optional: Enable scroll on layer 5
         scroller {
@@ -104,7 +104,7 @@
         <&zip_scroll_scaler 2 5>;
 #else
     // CURSOR MODE: Normal cursor with auto mouse layer
-    input-processors = <&zip_temp_layer 5 2000>;
+    input-processors = <&zip_temp_layer 5 10000>;
 
     // Enable scroll on layer 5
     scroller {
